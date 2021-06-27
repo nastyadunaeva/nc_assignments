@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @RestController
@@ -37,5 +39,10 @@ public class MainController {
         StringBuilder sb = new StringBuilder();
         all.forEach(p -> sb.append(p.getFirstName()+ " " + p.getLastName() + "<br>"));
         return sb.toString();
+    }
+    
+    @PostMapping("/add")
+    public String add(@RequestBody Person person) {
+    	return person.getFirstName() + " " + person.getLastName() + " was added to the database";
     }
 }
