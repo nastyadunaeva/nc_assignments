@@ -5,11 +5,13 @@ import com.example.jpa_h2.entity.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Component;
  
 @Component
 public class DataInit implements ApplicationRunner {
- 
+
+    @Autowired
     private PersonCrudRepository personCrudRepository;
  
     @Autowired

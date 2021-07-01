@@ -4,13 +4,7 @@ import com.example.jpa_h2.repository.PersonCrudRepository;
 import com.example.jpa_h2.entity.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class MainController {
@@ -45,6 +39,13 @@ public class MainController {
     
     @PostMapping("/add")
     public String add(@RequestBody Person person) {
+        personCrudRepository.save(person);
     	return person.getFirstName() + " " + person.getLastName() + " was added to the database";
+    }
+
+    @DeleteMapping("/delete/{id}")
+    public String delete(@PathVariable Long id) {
+        personCrudRepository.deleteById(id);
+        return "Person was removed from the database";
     }
 }
