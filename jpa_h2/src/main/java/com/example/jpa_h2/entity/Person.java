@@ -1,5 +1,7 @@
 package com.example.jpa_h2.entity;
 
+import com.example.jpa_h2.model.Role;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -20,6 +22,15 @@ public class Person {
     
     @Column(name="Last_Name", length = 64, nullable = false)
     private String lastName;
+
+    @Column(name = "Username", length = 64, nullable = false, unique = true)
+    private String username;
+
+    @Column(name = "Password", length = 64, nullable = false)
+    private String password;
+
+    @Column(name = "Role", length = 64, nullable = false)
+    private Role role = Role.USER;
     
     public Long getId() {
         return id;
@@ -44,5 +55,17 @@ public class Person {
     public void setLastName(String lastName) {
     	this.lastName = lastName;
     }
+
+    public String getUsername() { return username; }
+
+    public void setUsername(String username) { this.username = username; }
+
+    public String getPassword() {return password; }
+
+    public void setPassword(String password) {this.password = password; }
+
+    public Role getRole() { return role; }
+
+    public void setRole(Role role) { this.role = role; }
  
 }
