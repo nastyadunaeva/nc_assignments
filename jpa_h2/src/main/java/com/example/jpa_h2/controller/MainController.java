@@ -16,7 +16,7 @@ public class MainController {
     public String all() {
         Iterable<Person> all = personCrudRepository.findAll();
         StringBuilder sb = new StringBuilder();
-        all.forEach(p -> sb.append(p.getFirstName()+ " " + p.getLastName() + "<br>"));
+        all.forEach(p -> sb.append(p.getFirstName()+ " " + p.getLastName() + " " + p.getUsername() + " " + p.getRole().name() + "<br>"));
         return sb.toString();
     }
     
