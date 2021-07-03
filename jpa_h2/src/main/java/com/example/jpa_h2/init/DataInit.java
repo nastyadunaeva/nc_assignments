@@ -14,15 +14,14 @@ import org.springframework.stereotype.Component;
 @Component
 public class DataInit implements ApplicationRunner {
 
-    @Autowired
     private PasswordEncoder passwordEncoder;
 
-    @Autowired
     private PersonCrudRepository personCrudRepository;
  
     @Autowired
-    public DataInit(PersonCrudRepository personCrudRepository) {
+    public DataInit(PersonCrudRepository personCrudRepository, PasswordEncoder passwordEncoder) {
         this.personCrudRepository = personCrudRepository;
+        this.passwordEncoder = passwordEncoder;
     }
  
     @Override

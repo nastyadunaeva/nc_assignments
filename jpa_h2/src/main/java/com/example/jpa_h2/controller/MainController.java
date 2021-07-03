@@ -4,13 +4,21 @@ import com.example.jpa_h2.repository.PersonCrudRepository;
 import com.example.jpa_h2.entity.Person;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 public class MainController {
- 
-    @Autowired
+
     private PersonCrudRepository personCrudRepository;
+
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    public MainController(PersonCrudRepository personCrudRepository, PasswordEncoder passwordEncoder) {
+        this.personCrudRepository = personCrudRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
  
     @RequestMapping(value = "/all", method = RequestMethod.GET)
     public String all() {
@@ -25,7 +33,7 @@ public class MainController {
     	Long i = new Long(id);
         Iterable<Person> all = personCrudRepository.findByIdLike(i);
         StringBuilder sb = new StringBuilder();
-        all.forEach(p -> sb.append(p.getFirstName()+ " " + p.getLastName() + "<br>"));
+        all.forEach(p -> sb.append(p.getFirstName()+ " " + p.getLastName() + " " + p.getUsername() + " " + p.getRole().name() + "<br>"));
         return sb.toString();
     }
     
@@ -33,12 +41,13 @@ public class MainController {
     public String lastName(@PathVariable String lastName) {
         Iterable<Person> all = personCrudRepository.findByLastNameLike(lastName);
         StringBuilder sb = new StringBuilder();
-        all.forEach(p -> sb.append(p.getFirstName()+ " " + p.getLastName() + "<br>"));
+        all.forEach(p -> sb.append(p.getFirstName()+ " " + p.getLastName() + " " + p.getUsername() + " " + p.getRole().name() + "<br>"));
         return sb.toString();
     }
     
     @PostMapping("/add")
     public String add(@RequestBody Person person) {
+        person.setPassword(passwordEncoder.encode(person.getPassword()));
         personCrudRepository.save(person);
     	return person.getFirstName() + " " + person.getLastName() + " was added to the database";
     }
