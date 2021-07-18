@@ -1,0 +1,45 @@
+ABT Abbott Laboratories
+ABBV AbbVie
+ACN Accenture
+ADBE Adobe Inc.
+GOOGL Alphabet Inc. (Class A)
+GOOG Alphabet Inc. (Class C)
+AMZN Amazon.com Inc.
+AAPL Apple Inc.
+T AT&T
+BAC Bank of America Corp.
+BAX Baxter International
+BDX Becton Dickinson
+BRK.B Berkshire Hathaway Inc. (Class B)
+AVGO Broadcom
+CVX Chevron Corporation
+CSCO Cisco Systems
+KO Coca-Cola Company
+CMCSA Comcast
+LLY Eli Lilly & Co
+XOM Exxon Mobil Corp.
+FB Facebook Inc. Class A
+HD Home Depot Inc.
+INTC Intel
+JNJ Johnson & Johnson
+JPM JPMorgan Chase & Co.
+MA MasterCard Inc. (Class A)
+MRK Merck & Co.
+MSFT Microsoft Corp.
+NFLX Netflix
+NKE Nike
+NVDA Nvidia Corp.
+PYPL PayPal Holdings Inc.
+PEP PepsiCo
+PFE Pfizer
+PG Procter & Gamble Co.
+CRM Salesforce
+TSLA Tesla
+TXN Texas Instruments
+DIS The Walt Disney Company
+TMO Thermo Fisher Scientific
+UNH UnitedHealth Group Inc.
+VZ Verizon Communications
+V Visa Inc. (Class A)
+WMT Walmart
+WFC Wells Fargo
