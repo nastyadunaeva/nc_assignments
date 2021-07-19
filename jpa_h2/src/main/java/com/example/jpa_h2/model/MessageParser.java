@@ -12,8 +12,8 @@ import java.util.regex.Pattern;
 
 public class MessageParser {
     public static void getPrices(String message) {
-        message = "{\"data\":[{\"p\":150.00,\"s\":\"AAPL\",\"t\":1575526691134,\"v\":0.011467}],\"type\":\"trade\"}";
-        System.out.println(message);
+        //message = "{\"data\":[{\"p\":290.00,\"s\":\"MSFT\",\"t\":1575526691134,\"v\":0.011467}],\"type\":\"trade\"}";
+        //System.out.println(message);
         List<String> strings = new ArrayList<>();
         if (message.matches(".*trade.*")) {
             Pattern pattern = Pattern.compile("\"p\":[0-9\\.]*,\"s\":\"[A-Z]*\"");

@@ -1,6 +1,5 @@
 package com.example.jpa_h2.controller;
 
-import com.example.jpa_h2.entity.Cat;
 import com.example.jpa_h2.entity.Person;
 import com.example.jpa_h2.entity.PersonStock;
 import com.example.jpa_h2.entity.Stock;
@@ -27,8 +26,6 @@ public class MainController {
 
     private PersonStockJPARepository personStockJPARepository;
 
-    private CatsRepository catsRepository;
-
     private StockMongoRepository stockMongoRepository;
 
     public static HashMap<String, Double> cache;
@@ -36,12 +33,11 @@ public class MainController {
     //private Long id_table;
 
     @Autowired
-    public MainController(PersonJPARepository personJPARepository, PasswordEncoder passwordEncoder, StockJPARepository stockJPARepository, PersonStockJPARepository personStockJPARepository, CatsRepository catsRepository, StockMongoRepository stockMongoRepository) {
+    public MainController(PersonJPARepository personJPARepository, PasswordEncoder passwordEncoder, StockJPARepository stockJPARepository, PersonStockJPARepository personStockJPARepository, StockMongoRepository stockMongoRepository) {
         this.personJPARepository = personJPARepository;
         this.passwordEncoder = passwordEncoder;
         this.stockJPARepository = stockJPARepository;
         this.personStockJPARepository = personStockJPARepository;
-        this.catsRepository = catsRepository;
         this.stockMongoRepository = stockMongoRepository;
         //this.id_table = new Long(0);
         cache = new HashMap<>();
@@ -89,6 +85,7 @@ public class MainController {
     public void updateInfo() {
 
         synchronized (cache) {
+            //System.out.println(cache);
             for (String symbol: cache.keySet()) {
                 //Stock stock = stockJPARepository.findBySymbol(symbol);
                 Stock stock = stockMongoRepository.findBySymbol(symbol);
@@ -197,14 +194,6 @@ public class MainController {
         else {
             sb.append("Access denied");
         }
-        return sb.toString();
-    }
-
-    @GetMapping(value = "/cats/all")
-    public String allCats() {
-        Iterable<Cat> all = catsRepository.findAll();
-        StringBuilder sb = new StringBuilder();
-        all.forEach(s -> sb.append(s.getId() + "   " + s.getName() + "<br>"));
         return sb.toString();
     }
 }

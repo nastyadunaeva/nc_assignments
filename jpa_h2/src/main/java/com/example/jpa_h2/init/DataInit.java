@@ -1,9 +1,7 @@
 package com.example.jpa_h2.init;
 
-import com.example.jpa_h2.entity.Cat;
 import com.example.jpa_h2.model.Role;
 import com.example.jpa_h2.entity.Person;
-import com.example.jpa_h2.repository.CatsRepository;
 import com.example.jpa_h2.repository.PersonJPARepository;
 import com.example.jpa_h2.repository.StockJPARepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,15 +18,12 @@ public class DataInit implements ApplicationRunner {
     private PersonJPARepository personJPARepository;
 
     private StockJPARepository stockJPARepository;
-
-    private CatsRepository catsRepository;
  
     @Autowired
-    public DataInit(PersonJPARepository personJPARepository, PasswordEncoder passwordEncoder, StockJPARepository stockJPARepository, CatsRepository catsRepository) {
+    public DataInit(PersonJPARepository personJPARepository, PasswordEncoder passwordEncoder, StockJPARepository stockJPARepository) {
         this.personJPARepository = personJPARepository;
         this.passwordEncoder = passwordEncoder;
         this.stockJPARepository = stockJPARepository;
-        this.catsRepository = catsRepository;
     }
  
     @Override
@@ -66,14 +61,6 @@ public class DataInit implements ApplicationRunner {
             personJPARepository.save(p3);
             personJPARepository.save(p4);
         }
-
-        /*if (catsRepository.count() == 0) {
-            Cat cat = new Cat();
-            Long id = new Long(1);
-            cat.setId(id);
-            cat.setName("Murka");
-            catsRepository.save(cat);
-        }*/
     }
      
 }
