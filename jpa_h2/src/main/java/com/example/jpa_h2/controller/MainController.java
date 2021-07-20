@@ -3,7 +3,6 @@ package com.example.jpa_h2.controller;
 import com.example.jpa_h2.entity.Person;
 import com.example.jpa_h2.entity.PersonStock;
 import com.example.jpa_h2.entity.Stock;
-import com.example.jpa_h2.model.Counter;
 import com.example.jpa_h2.model.FileParser;
 import com.example.jpa_h2.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +12,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @RestController
@@ -30,7 +30,7 @@ public class MainController {
 
     public static HashMap<String, Double> cache;
 
-    //private Long id_table;
+    //public static Long currentTime;
 
     @Autowired
     public MainController(PersonJPARepository personJPARepository, PasswordEncoder passwordEncoder, StockJPARepository stockJPARepository, PersonStockJPARepository personStockJPARepository, StockMongoRepository stockMongoRepository) {
@@ -39,7 +39,6 @@ public class MainController {
         this.stockJPARepository = stockJPARepository;
         this.personStockJPARepository = personStockJPARepository;
         this.stockMongoRepository = stockMongoRepository;
-        //this.id_table = new Long(0);
         cache = new HashMap<>();
     }
  
@@ -88,19 +87,20 @@ public class MainController {
             //System.out.println(cache);
             for (String symbol: cache.keySet()) {
                 //Stock stock = stockJPARepository.findBySymbol(symbol);
-                Stock stock = stockMongoRepository.findBySymbol(symbol);
-                if (stock == null) {
-                    stock = new Stock();
-                    Counter.count++;
-                    stock.setId(Counter.count);
+                //Stock stock = stockMongoRepository.findBySymbol(symbol);
+                Stock stock = new Stock();
+                //if (stock == null) {
+                  //  stock = new Stock();
+                    Long id = stockMongoRepository.count()+1;
+                    stock.setId(id);
                     stock.setSymbol(symbol);
 
-                }
+                //}
                 stock.setLongName(FileParser.tickerName.get(symbol));
                 stock.setRegularMarketPrice(cache.get(symbol));
-
                 stock.setTradeable(true);
-                //stockJPARepository.save(stock);
+                Date date = new Date();
+                stock.setTime(date.getTime());
                 stockMongoRepository.save(stock);
             }
             cache.clear();
@@ -110,9 +110,14 @@ public class MainController {
     @GetMapping(value = "/stock/all")
     public String allStocks() {
         //Iterable<Stock> all = stockJPARepository.findAll();
-        Iterable<Stock> all = stockMongoRepository.findAll();
         StringBuilder sb = new StringBuilder();
-        all.forEach(s -> sb.append(s.getSymbol() + "   " + s.getLongName() + "   " + s.getRegularMarketPrice() + "<br>"));
+        for (String ticker: FileParser.tickerName.keySet()) {
+            Stock s = stockMongoRepository.findTop1BySymbolOrderByTimeDesc(ticker);
+            if (s != null) {
+                sb.append(s.getSymbol() + "   " + s.getLongName() + "   " + s.getRegularMarketPrice() + "<br>");
+            }
+
+        }
         return sb.toString();
     }
 
@@ -130,9 +135,8 @@ public class MainController {
             }
             if (person != null) {
                 PersonStock personStock = new PersonStock();
-                //Stock stock = stockJPARepository.findBySymbol(ticker);
-                Stock stock = stockMongoRepository.findBySymbol(ticker);
-                personStock.setStockId(stock.getId());
+                Stock stock = stockMongoRepository.findTop1BySymbolOrderByTimeDesc(ticker);
+                personStock.setStockTicker(ticker);
                 personStock.setPersonId(person.getId());
                 personStockJPARepository.save(personStock);
             }
@@ -156,9 +160,7 @@ public class MainController {
                 person = null;
             }
             if (person != null) {
-                //Stock stock = stockJPARepository.findBySymbol(ticker);
-                Stock stock = stockMongoRepository.findBySymbol(ticker);
-                PersonStock personStock = personStockJPARepository.findByPersonIdAndStockId(person.getId(), stock.getId()).get();
+                PersonStock personStock = personStockJPARepository.findByPersonIdAndStockTicker(person.getId(), ticker).get();
                 personStockJPARepository.delete(personStock);
             }
         }
@@ -184,10 +186,9 @@ public class MainController {
                 Long personId = person.getId();
                 List<PersonStock> personStocks = personStockJPARepository.findByPersonId(personId);
                 for (PersonStock personStock: personStocks) {
-                    Long stockId = personStock.getStockId();
-                    //Stock stock = stockJPARepository.findById(stockId).get();
-                    Stock stock = stockMongoRepository.findById(stockId).get();
-                    sb.append(stock.getSymbol() + " " + stock.getLongName() + " " + stock.getRegularMarketPrice() + "<br>");
+                    String ticker = personStock.getStockTicker();
+                    Stock newest = stockMongoRepository.findTop1BySymbolOrderByTimeDesc(ticker);
+                    sb.append(newest.getSymbol() + " " + newest.getLongName() + " " + newest.getRegularMarketPrice() + "<br>");
                 }
             }
         }

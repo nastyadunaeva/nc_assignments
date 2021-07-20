@@ -3,10 +3,7 @@ package com.example.jpa_h2.model;
 import com.example.jpa_h2.controller.MainController;
 import org.springframework.data.util.Pair;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -14,6 +11,8 @@ public class MessageParser {
     public static void getPrices(String message) {
         //message = "{\"data\":[{\"p\":290.00,\"s\":\"MSFT\",\"t\":1575526691134,\"v\":0.011467}],\"type\":\"trade\"}";
         //System.out.println(message);
+        //Date date = new Date();
+        //System.out.println(date.getTime());
         List<String> strings = new ArrayList<>();
         if (message.matches(".*trade.*")) {
             Pattern pattern = Pattern.compile("\"p\":[0-9\\.]*,\"s\":\"[A-Z]*\"");
@@ -43,13 +42,6 @@ public class MessageParser {
             }
 
 
-        }
-        if (MainController.cache != null) {
-            synchronized (MainController.cache) {
-                //System.out.println(MainController.cache);
-                //System.out.println();
-                //System.out.println();
-            }
         }
     }
 }

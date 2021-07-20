@@ -30,8 +30,6 @@ public class Stock {
     @Column(name = "Tradeable", nullable = false)
     private boolean tradeable;
 
-    //@Transient
-    //@ManyToMany(mappedBy = "favorite")
-    //private Set<Person> persons;
+    private Long time;
 
 }

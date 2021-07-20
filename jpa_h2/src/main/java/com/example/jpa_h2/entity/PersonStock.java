@@ -19,7 +19,9 @@ public class PersonStock {
     @Column(name = "Person_Id")
     private Long personId;
 
-    @Column(name = "Stock_Id")
-    private Long stockId;
+    //@Column(name = "Stock_Id")
+    //private Long stockId;
 
+    @Column(name = "Stock_Ticker")
+    private String stockTicker;
 }

@@ -33,8 +33,5 @@ public class Person {
     @Column(name = "Role", length = 64, nullable = false)
     private Role role = Role.USER;
 
-    //@ManyToMany(fetch = FetchType.EAGER)
-    //public Set<Stock> stocks;
-
  
 }

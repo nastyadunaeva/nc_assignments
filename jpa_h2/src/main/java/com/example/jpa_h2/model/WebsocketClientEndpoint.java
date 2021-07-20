@@ -27,11 +27,11 @@ public class WebsocketClientEndpoint {
     public void onOpen(Session userSession) {
         System.out.println("opening websocket");
         this.userSession = userSession;
-        List<String> tickers = FileParser.spList();
+        /*List<String> tickers = FileParser.spList();
         for (String ticker: tickers) {
             String eventString = "{\"type\":\"subscribe\",\"symbol\":\"" + ticker + "\"}";
             sendMessage(eventString);
-        }
+        }*/
 
     }
 

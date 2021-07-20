@@ -9,6 +9,8 @@ import java.util.Optional;
 
 @Repository
 public interface PersonStockJPARepository extends JpaRepository<PersonStock, Long> {
-    public Optional<PersonStock> findByPersonIdAndStockId(Long personId, Long stockId);
+    //public Optional<PersonStock> findByPersonIdAndStockId(Long personId, Long stockId);
     public List<PersonStock> findByPersonId(Long personId);
+    public Optional<PersonStock> findByStockTicker(String ticker);
+    public Optional<PersonStock> findByPersonIdAndStockTicker(Long personId, String stockTicker);
 }

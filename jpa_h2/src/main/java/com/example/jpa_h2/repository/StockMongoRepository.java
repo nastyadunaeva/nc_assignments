@@ -7,5 +7,6 @@ import java.util.List;
 
 public interface StockMongoRepository extends MongoRepository<Stock, Long>{
     public List<Stock> findAll();
-    public Stock findBySymbol(String symbol);
+    public List<Stock> findBySymbolOrderByTimeDesc(String symbol);
+    public Stock findTop1BySymbolOrderByTimeDesc(String symbol);
 }
