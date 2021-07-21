@@ -1,5 +1,6 @@
 package com.example.jpa_h2.controller;
 
+import com.example.jpa_h2.entity.CompanyProfile;
 import com.example.jpa_h2.entity.Person;
 import com.example.jpa_h2.entity.PersonStock;
 import com.example.jpa_h2.entity.Stock;
@@ -7,9 +8,11 @@ import com.example.jpa_h2.model.FileParser;
 import com.example.jpa_h2.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import java.security.Principal;
 import java.text.SimpleDateFormat;
@@ -208,12 +211,27 @@ public class MainController {
             Stock yesterday = stockMongoRepository.findTop1BySymbolAndTimeGreaterThanOrderByTimeAsc(ticker, dayAgo).get();
             Double percent = (stock.getRegularMarketPrice() - yesterday.getRegularMarketPrice()) / yesterday.getRegularMarketPrice() * 100;
             String result = String.format("%.2f", percent);
-            
+
             if (percent > 0.000001) {
                 sb.append(stock.getSymbol() + "   " + stock.getLongName() + "   " + stock.getRegularMarketPrice() + "    +" + result + "%" + "<br>");
             } else {
                 sb.append(stock.getSymbol() + "   " + stock.getLongName() + "   " + stock.getRegularMarketPrice() + "   " + result + "%" + "<br>");
             }
+
+            String url = "https://finnhub.io/api/v1/stock/profile2?symbol=" + ticker + "&token=c3jfck2ad3i82raod360";
+            RestTemplate restTemplate = new RestTemplate();
+            CompanyProfile companyProfile = restTemplate.getForObject(url, CompanyProfile.class);
+            //ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
+            //String body = responseEntity.getBody();
+            sb.append("<br>");
+            sb.append("<br>");
+            sb.append("Industry: " + companyProfile.getFinnhubIndustry() + "<br>");
+            sb.append("Country of company's headquater: " + companyProfile.getCountry() + "<br>");
+            sb.append("Currency used in company filings: " + companyProfile.getCurrency() + "<br>");
+            sb.append("IPO date: " + companyProfile.getIpo() + "<br>");
+            sb.append("Market capitalization: " + companyProfile.getMarketCapitalization() + "<br>");
+            sb.append("Company website: " + companyProfile.getWeburl() + "<br>");
+
 
         } else {
             sb.append("Stock not found");
