@@ -142,5 +142,7 @@
     <orderEntry type="library" name="Maven: org.mongodb:bson:4.2.3" level="project" />
     <orderEntry type="library" name="Maven: org.mongodb:mongodb-driver-core:4.2.3" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.data:spring-data-mongodb:3.2.2" level="project" />
+    <orderEntry type="library" name="Maven: javax.json:javax.json-api:1.1.4" level="project" />
+    <orderEntry type="library" name="Maven: org.json:json:20210307" level="project" />
   </component>
 </module>

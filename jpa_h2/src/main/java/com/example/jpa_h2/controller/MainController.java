@@ -6,6 +6,8 @@ import com.example.jpa_h2.entity.PersonStock;
 import com.example.jpa_h2.entity.Stock;
 import com.example.jpa_h2.model.FileParser;
 import com.example.jpa_h2.repository.*;
+import org.json.JSONArray;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import org.springframework.http.ResponseEntity;
@@ -14,6 +16,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
+import javax.json.Json;
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 import java.security.Principal;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -45,15 +50,36 @@ public class MainController {
         cache = new HashMap<>();
     }
  
-    @RequestMapping(value = "/all", method = RequestMethod.GET)
+    /*@RequestMapping(value = "/api/all", method = RequestMethod.GET)
     public String all() {
         Iterable<Person> all = personJPARepository.findAll();
         StringBuilder sb = new StringBuilder();
         all.forEach(p -> sb.append(p.getFirstName()+ " " + p.getLastName() + " " + p.getUsername() + " " + p.getRole().name() + "<br>"));
         return sb.toString();
+    }*/
+
+    /*@RequestMapping(value = "/api/all", method = RequestMethod.GET)
+    public ResponseEntity<?> all() {
+        Iterable<Person> all = personJPARepository.findAll();
+        return ResponseEntity.ok(all);
+    }*/
+
+    @RequestMapping(value = "/api/all", method = RequestMethod.GET)
+    public ResponseEntity<?> all() {
+        Iterable<Person> all = personJPARepository.findAll();
+        JSONArray jsonArray = new JSONArray();
+        for (Person p : all) {
+            JSONObject jsonObject = new JSONObject();
+            jsonObject.put("firstName", p.getFirstName());
+            jsonObject.put("lastName", p.getLastName());
+            jsonObject.put("username", p.getUsername());
+            jsonObject.put("role", p.getRole().name());
+            jsonArray.put(jsonObject);
+        }
+        return ResponseEntity.ok(jsonArray.toString());
     }
     
-    @GetMapping("/{id}")
+    @GetMapping("/api/{id}")
     public String index(@PathVariable long id) {
     	Long i = new Long(id);
         Iterable<Person> all = personJPARepository.findByIdLike(i);
@@ -62,7 +88,7 @@ public class MainController {
         return sb.toString();
     }
     
-    @GetMapping("/name/{lastName}")
+    @GetMapping("/api/name/{lastName}")
     public String lastName(@PathVariable String lastName) {
         Iterable<Person> all = personJPARepository.findByLastNameLike(lastName);
         StringBuilder sb = new StringBuilder();
@@ -70,14 +96,14 @@ public class MainController {
         return sb.toString();
     }
     
-    @PostMapping("/add")
+    @PostMapping("/api/add")
     public String add(@RequestBody Person person) {
         person.setPassword(passwordEncoder.encode(person.getPassword()));
         personJPARepository.save(person);
     	return person.getFirstName() + " " + person.getLastName() + " was added to the database";
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/api/delete/{id}")
     public String delete(@PathVariable Long id) {
         personJPARepository.deleteById(id);
         return "Person was removed from the database";
@@ -110,21 +136,29 @@ public class MainController {
         }
     }
 
-    @GetMapping(value = "/stock/all")
-    public String allStocks() {
+    @GetMapping(value = "/api/stock/all")
+    public ResponseEntity<?> allStocks() {
         //Iterable<Stock> all = stockJPARepository.findAll();
-        StringBuilder sb = new StringBuilder();
+        //StringBuilder sb = new StringBuilder();
+        JSONArray jsonArray = new JSONArray();
         for (String ticker: FileParser.tickerName.keySet()) {
             Stock s = stockMongoRepository.findTop1BySymbolOrderByTimeDesc(ticker);
             if (s != null) {
-                sb.append(s.getSymbol() + "   " + s.getLongName() + "   " + s.getRegularMarketPrice() + "<br>");
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("symbol", s.getSymbol());
+                jsonObject.put("longName", s.getLongName());
+                jsonObject.put("regularMarketPrice", s.getRegularMarketPrice());
+                jsonArray.put(jsonObject);
+
+                //sb.append(s.getSymbol() + "   " + s.getLongName() + "   " + s.getRegularMarketPrice() + "<br>");
             }
 
         }
-        return sb.toString();
+        //return sb.toString();
+        return ResponseEntity.ok(jsonArray.toString());
     }
 
-    @PostMapping(value = "/stock/{username}/favorites/add/{ticker}")
+    @PostMapping(value = "/api/stock/{username}/favorites/add/{ticker}")
     public String addFavorite(@PathVariable String username, @PathVariable String ticker, Principal principal) {
         StringBuilder sb = new StringBuilder();
         if (principal.getName().compareTo(username) == 0) {
@@ -150,7 +184,7 @@ public class MainController {
         return sb.toString();
     }
 
-    @DeleteMapping(value = "/stock/{username}/favorites/delete/{ticker}")
+    @DeleteMapping(value = "/api/stock/{username}/favorites/delete/{ticker}")
     public String deleteFavorite(@PathVariable String username, @PathVariable String ticker, Principal principal) {
         StringBuilder sb = new StringBuilder();
         if (principal.getName().compareTo(username) == 0) {
@@ -173,7 +207,7 @@ public class MainController {
         return sb.toString();
     }
 
-    @GetMapping(value = "/stock/{username}/favorites")
+    @GetMapping(value = "/api/stock/{username}/favorites")
     public String getFavorites(@PathVariable String username, Principal principal) {
         StringBuilder sb = new StringBuilder();
         if (principal.getName().compareTo(username) == 0) {
@@ -201,7 +235,7 @@ public class MainController {
         return sb.toString();
     }
 
-    @GetMapping(value = "/stock/{ticker}")
+    @GetMapping(value = "/api/stock/{ticker}")
     public String getInfoStock(@PathVariable String ticker) {
         StringBuilder sb = new StringBuilder();
         Stock stock = stockMongoRepository.findTop1BySymbolOrderByTimeDesc(ticker);
