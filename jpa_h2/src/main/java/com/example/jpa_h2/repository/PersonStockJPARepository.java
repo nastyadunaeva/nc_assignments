@@ -12,5 +12,5 @@ public interface PersonStockJPARepository extends JpaRepository<PersonStock, Lon
     //public Optional<PersonStock> findByPersonIdAndStockId(Long personId, Long stockId);
     public List<PersonStock> findByPersonId(Long personId);
     public Optional<PersonStock> findByStockTicker(String ticker);
-    public Optional<PersonStock> findByPersonIdAndStockTicker(Long personId, String stockTicker);
+    public List<PersonStock> findByPersonIdAndStockTicker(Long personId, String stockTicker);
 }

@@ -6,6 +6,7 @@ import com.example.jpa_h2.entity.PersonStock;
 import com.example.jpa_h2.entity.Stock;
 import com.example.jpa_h2.model.FileParser;
 import com.example.jpa_h2.repository.*;
+import org.hibernate.NonUniqueResultException;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -143,34 +144,48 @@ public class MainController {
         JSONArray jsonArray = new JSONArray();
         for (String ticker: FileParser.tickerName.keySet()) {
             Stock s = stockMongoRepository.findTop1BySymbolOrderByTimeDesc(ticker);
+            Double percent = 0.0;
+
+
             if (s != null) {
+                Long now = s.getTime();
+                Long dayAgo = now - 24 * 60 * 60 * 1000;
+                Stock yesterday = stockMongoRepository.findTop1BySymbolAndTimeGreaterThanOrderByTimeAsc(ticker, dayAgo).get();
+                percent = (s.getRegularMarketPrice() - yesterday.getRegularMarketPrice()) / yesterday.getRegularMarketPrice() * 100;
+                //percent = Math.round(percent, 2);
+
                 JSONObject jsonObject = new JSONObject();
                 jsonObject.put("symbol", s.getSymbol());
                 jsonObject.put("longName", s.getLongName());
                 jsonObject.put("regularMarketPrice", s.getRegularMarketPrice());
+                jsonObject.put("change", percent);
+                jsonObject.put("description", "");
                 jsonArray.put(jsonObject);
-
-                //sb.append(s.getSymbol() + "   " + s.getLongName() + "   " + s.getRegularMarketPrice() + "<br>");
             }
+
+
+            //sb.append(s.getSymbol() + "   " + s.getLongName() + "   " + s.getRegularMarketPrice() + "<br>");
 
         }
         //return sb.toString();
         return ResponseEntity.ok(jsonArray.toString());
     }
 
-    @PostMapping(value = "/api/stock/{username}/favorites/add/{ticker}")
-    public String addFavorite(@PathVariable String username, @PathVariable String ticker, Principal principal) {
+    @PostMapping(value = "/api/stock/favorites/add/{ticker}")
+    public void addFavorite(@PathVariable String ticker, Principal principal) {
         StringBuilder sb = new StringBuilder();
-        if (principal.getName().compareTo(username) == 0) {
-            Person person = new Person();
-            try {
-                person = personJPARepository.findByUsername(username).get();
-            }
-            catch (NoSuchElementException e) {
-                System.out.println("Username not found.");
-                person = null;
-            }
-            if (person != null) {
+        String username = principal.getName();
+        Person person = new Person();
+        try {
+            person = personJPARepository.findByUsername(username).get();
+        }
+        catch (NoSuchElementException e) {
+            System.out.println("Username not found.");
+            person = null;
+        }
+        if (person != null) {
+            List<PersonStock> personStocks = personStockJPARepository.findByPersonIdAndStockTicker(person.getId(), ticker);
+            if (personStocks.size() == 0) {
                 PersonStock personStock = new PersonStock();
                 Stock stock = stockMongoRepository.findTop1BySymbolOrderByTimeDesc(ticker);
                 personStock.setStockTicker(ticker);
@@ -178,36 +193,28 @@ public class MainController {
                 personStockJPARepository.save(personStock);
             }
         }
-        else {
-            sb.append("Access denied");
-        }
-        return sb.toString();
     }
 
-    @DeleteMapping(value = "/api/stock/{username}/favorites/delete/{ticker}")
-    public String deleteFavorite(@PathVariable String username, @PathVariable String ticker, Principal principal) {
-        StringBuilder sb = new StringBuilder();
-        if (principal.getName().compareTo(username) == 0) {
-            Person person = new Person();
-            try {
-                person = personJPARepository.findByUsername(username).get();
-            }
-            catch (NoSuchElementException e) {
-                System.out.println("Username not found.");
-                person = null;
-            }
-            if (person != null) {
-                PersonStock personStock = personStockJPARepository.findByPersonIdAndStockTicker(person.getId(), ticker).get();
-                personStockJPARepository.delete(personStock);
-            }
+    @DeleteMapping(value = "/api/stock/favorites/delete/{ticker}")
+    public void deleteFavorite(@PathVariable String ticker, Principal principal) {
+        //StringBuilder sb = new StringBuilder();
+        String username = principal.getName();
+        Person person = new Person();
+        try {
+            person = personJPARepository.findByUsername(username).get();
         }
-        else {
-            sb.append("Access denied");
+        catch (NoSuchElementException e) {
+            System.out.println("Username not found.");
+            person = null;
         }
-        return sb.toString();
+        if (person != null) {
+            PersonStock personStock = personStockJPARepository.findByPersonIdAndStockTicker(person.getId(), ticker).get(0);
+            personStockJPARepository.delete(personStock);
+        }
+        //return sb.toString();
     }
 
-    @GetMapping(value = "/api/stock/{username}/favorites")
+    /*@GetMapping(value = "/api/stock/{username}/favorites")
     public String getFavorites(@PathVariable String username, Principal principal) {
         StringBuilder sb = new StringBuilder();
         if (principal.getName().compareTo(username) == 0) {
@@ -233,11 +240,46 @@ public class MainController {
             sb.append("Access denied");
         }
         return sb.toString();
+    }*/
+
+    @GetMapping(value = "/api/stock/favorites")
+    public ResponseEntity<?> getFavorites(Principal principal) {
+        //StringBuilder sb = new StringBuilder();
+        JSONArray jsonArray = new JSONArray();
+        String username = principal.getName();
+        Person person = new Person();
+        try {
+            person = personJPARepository.findByUsername(username).get();
+        }
+        catch (NoSuchElementException e) {
+            System.out.println("Username not found.");
+            person = null;
+        }
+        if (person != null) {
+            Long personId = person.getId();
+            List<PersonStock> personStocks = personStockJPARepository.findByPersonId(personId);
+            for (PersonStock personStock: personStocks) {
+                String ticker = personStock.getStockTicker();
+                Stock newest = stockMongoRepository.findTop1BySymbolOrderByTimeDesc(ticker);
+
+                JSONObject jsonObject = new JSONObject();
+                jsonObject.put("symbol", newest.getSymbol());
+                jsonObject.put("longName", newest.getLongName());
+                jsonObject.put("regularMarketPrice", newest.getRegularMarketPrice());
+                jsonObject.put("change", 0);
+                jsonObject.put("description", "");
+                jsonArray.put(jsonObject);
+                //sb.append(newest.getSymbol() + " " + newest.getLongName() + " " + newest.getRegularMarketPrice() + "<br>");
+            }
+        }
+        //return sb.toString();
+        return ResponseEntity.ok(jsonArray.toString());
     }
 
     @GetMapping(value = "/api/stock/{ticker}")
-    public String getInfoStock(@PathVariable String ticker) {
+    public ResponseEntity<?> getInfoStock(@PathVariable String ticker) {
         StringBuilder sb = new StringBuilder();
+        JSONObject jsonStock = new JSONObject();
         Stock stock = stockMongoRepository.findTop1BySymbolOrderByTimeDesc(ticker);
         if (stock != null) {
             Long now = stock.getTime();
@@ -246,30 +288,38 @@ public class MainController {
             Double percent = (stock.getRegularMarketPrice() - yesterday.getRegularMarketPrice()) / yesterday.getRegularMarketPrice() * 100;
             String result = String.format("%.2f", percent);
 
+            jsonStock.put("symbol", stock.getSymbol());
+            jsonStock.put("longName", stock.getLongName());
+            jsonStock.put("regularMarketPrice", stock.getRegularMarketPrice());
+            jsonStock.put("change", percent);
+
             if (percent > 0.000001) {
-                sb.append(stock.getSymbol() + "   " + stock.getLongName() + "   " + stock.getRegularMarketPrice() + "    +" + result + "%" + "<br>");
+                //sb.append(stock.getSymbol() + "   " + stock.getLongName() + "   " + stock.getRegularMarketPrice() + "    +" + result + "%" + "<br>");
             } else {
-                sb.append(stock.getSymbol() + "   " + stock.getLongName() + "   " + stock.getRegularMarketPrice() + "   " + result + "%" + "<br>");
+                //sb.append(stock.getSymbol() + "   " + stock.getLongName() + "   " + stock.getRegularMarketPrice() + "   " + result + "%" + "<br>");
             }
 
             String url = "https://finnhub.io/api/v1/stock/profile2?symbol=" + ticker + "&token=c3jfck2ad3i82raod360";
             RestTemplate restTemplate = new RestTemplate();
             CompanyProfile companyProfile = restTemplate.getForObject(url, CompanyProfile.class);
-            //ResponseEntity<String> responseEntity = restTemplate.getForEntity(url, String.class);
-            //String body = responseEntity.getBody();
-            sb.append("<br>");
-            sb.append("<br>");
-            sb.append("Industry: " + companyProfile.getFinnhubIndustry() + "<br>");
+
+
+
+            sb.append("Industry: " + companyProfile.getFinnhubIndustry() + "\n");
             sb.append("Country of company's headquater: " + companyProfile.getCountry() + "<br>");
             sb.append("Currency used in company filings: " + companyProfile.getCurrency() + "<br>");
             sb.append("IPO date: " + companyProfile.getIpo() + "<br>");
             sb.append("Market capitalization: " + companyProfile.getMarketCapitalization() + "<br>");
             sb.append("Company website: " + companyProfile.getWeburl() + "<br>");
 
+            jsonStock.put("description", sb.toString());
+
 
         } else {
-            sb.append("Stock not found");
+            //sb.append("Stock not found");
         }
-        return sb.toString();
+        //return sb.toString();
+        //System.out.println(jsonStock.toString());
+        return ResponseEntity.ok(jsonStock.toString());
     }
 }
