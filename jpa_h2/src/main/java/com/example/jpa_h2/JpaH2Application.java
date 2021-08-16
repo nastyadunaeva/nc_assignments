@@ -1,18 +1,14 @@
 package com.example.jpa_h2;
 
-import com.example.jpa_h2.model.FileParser;
-import com.example.jpa_h2.model.MessageParser;
-import com.example.jpa_h2.model.WebsocketClientEndpoint;
+import com.example.jpa_h2.utils.FileParser;
+import com.example.jpa_h2.utils.MessageParser;
+import com.example.jpa_h2.utils.WebsocketClientEndpoint;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
-import java.io.BufferedReader;
-import java.io.FileReader;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.List;
 
 @SpringBootApplication
 @EnableScheduling
